@@ -28,6 +28,8 @@ import './App.css'
 const phoneDisplay = '(270) 577-2479'
 const phoneHref = 'tel:+12705772479'
 const smsHrefBase = 'sms:+12705772479'
+const emailDisplay = 'service@elevatedautorepairky.com'
+const emailHrefBase = `mailto:${emailDisplay}`
 const address = '3046 Ohio Dr, Henderson, KY 42420'
 const mapsHref = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`
 const facebookHref = 'https://www.facebook.com/search/top?q=Elevated%20Auto%20Repair%20Henderson%20KY'
@@ -188,6 +190,12 @@ function App() {
     if (!submittedMessage) return smsHrefBase
     return `${smsHrefBase}?&body=${encodeURIComponent(submittedMessage)}`
   }, [submittedMessage])
+
+  const submittedEmailHref = useMemo(() => {
+    if (!submittedRequest || !submittedMessage) return emailHrefBase
+    const subject = `Service request ${submittedRequest.id}`
+    return `${emailHrefBase}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(submittedMessage)}`
+  }, [submittedMessage, submittedRequest])
 
   function handleQuickChange(event) {
     const { name, value } = event.target
@@ -489,6 +497,10 @@ function App() {
                 <a href={phoneHref}>{phoneDisplay}</a>
               </p>
               <p>
+                <Mail size={17} aria-hidden="true" />
+                <a href={emailHrefBase}>{emailDisplay}</a>
+              </p>
+              <p>
                 <Clock3 size={17} aria-hidden="true" />
                 Call for current availability
               </p>
@@ -640,8 +652,12 @@ function App() {
               </button>
               {submittedRequest && (
                 <>
-                  <a className="button button-dark" href={submittedSmsHref}>
+                  <a className="button button-dark" href={submittedEmailHref}>
                     <Mail size={18} aria-hidden="true" />
+                    Email request
+                  </a>
+                  <a className="button button-dark" href={submittedSmsHref}>
+                    <Phone size={18} aria-hidden="true" />
                     Text request
                   </a>
                   <button className="button button-outline" type="button" onClick={copyRequest}>
@@ -663,6 +679,7 @@ function App() {
           <h2>Contact</h2>
           <p>{address}</p>
           <a href={phoneHref}>{phoneDisplay}</a>
+          <a href={emailHrefBase}>{emailDisplay}</a>
         </div>
         <div>
           <h2>Quick links</h2>
