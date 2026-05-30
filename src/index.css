@@ -1,0 +1,68 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Rajdhani:wght@600;700&display=swap');
+
+:root {
+  --orange: #eb6e11;
+  --orange-deep: #c75206;
+  --silver: #afafb0;
+  --ink: #161616;
+  --ink-2: #252525;
+  --text: #4d5056;
+  --muted: #777b83;
+  --line: #dedfe2;
+  --soft: #f5f6f7;
+  --white: #ffffff;
+  --success: #187146;
+  --error: #b3261e;
+  --shadow: 0 22px 60px rgba(20, 20, 20, 0.16);
+  --sharp-shadow: 0 14px 36px rgba(20, 20, 20, 0.14);
+  --radius: 8px;
+  --brand-heading: 'Bank Gothic', 'Rajdhani', 'Arial Narrow', Arial, sans-serif;
+  --body: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: var(--text);
+  background: var(--white);
+  font-family: var(--body);
+  font-synthesis: none;
+  letter-spacing: 0;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background: var(--white);
+  overflow-x: hidden;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+#root {
+  min-height: 100svh;
+}
