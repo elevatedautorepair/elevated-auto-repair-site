@@ -32,7 +32,7 @@ const emailDisplay = 'service@elevatedautorepairky.com'
 const emailHrefBase = `mailto:${emailDisplay}`
 const address = '3046 Ohio Dr, Henderson, KY 42420'
 const mapsHref = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`
-const facebookHref = 'https://www.facebook.com/search/top?q=Elevated%20Auto%20Repair%20Henderson%20KY'
+const facebookHref = 'https://www.facebook.com/share/18XtvYkQjM/?mibextid=wwXIfr'
 
 const services = [
   {
