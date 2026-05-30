@@ -130,7 +130,7 @@ const initialForm = {
   make: '',
   model: '',
   mileage: '',
-  service: 'Diagnostics',
+  service: [],
   date: '',
   time: '',
   dropoff: '',
@@ -152,6 +152,8 @@ const requiredFields = [
 ]
 
 function formatRequest(request, requestId) {
+  const selectedServices = Array.isArray(request.service) ? request.service : [request.service].filter(Boolean)
+
   return [
     `Elevated Auto Repair request ${requestId}`,
     `Name: ${request.firstName} ${request.lastName}`,
@@ -159,7 +161,7 @@ function formatRequest(request, requestId) {
     request.email ? `Email: ${request.email}` : null,
     `Vehicle: ${request.vehicleYear} ${request.make} ${request.model}`,
     request.mileage ? `Mileage: ${request.mileage}` : null,
-    `Service: ${request.service}`,
+    `Services: ${selectedServices.join(', ')}`,
     `Preferred: ${request.date} at ${request.time}`,
     `Visit type: ${request.dropoff}`,
     request.photoName ? `Photo: ${request.photoName}` : null,
@@ -169,10 +171,24 @@ function formatRequest(request, requestId) {
     .join('\n')
 }
 
+function toggleService(currentServices, service) {
+  const selectedServices = Array.isArray(currentServices) ? currentServices : [currentServices].filter(Boolean)
+
+  if (selectedServices.includes(service)) {
+    return selectedServices.filter((selectedService) => selectedService !== service)
+  }
+
+  return [...selectedServices, service]
+}
+
+function fieldHasValue(value) {
+  return Array.isArray(value) ? value.length > 0 : Boolean(value?.trim())
+}
+
 function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [quickQuote, setQuickQuote] = useState({
-    service: 'Diagnostics',
+    service: [],
     vehicleYear: '',
     make: '',
     model: '',
@@ -203,7 +219,7 @@ function App() {
   }
 
   function selectQuickService(service) {
-    setQuickQuote((current) => ({ ...current, service }))
+    setQuickQuote((current) => ({ ...current, service: toggleService(current.service, service) }))
   }
 
   function continueToAppointment() {
@@ -227,13 +243,18 @@ function App() {
   }
 
   function selectService(service) {
-    setFormData((current) => ({ ...current, service }))
+    setFormData((current) => ({ ...current, service: toggleService(current.service, service) }))
     document.getElementById('book')?.scrollIntoView({ behavior: 'smooth' })
+  }
+
+  function selectFormService(service) {
+    setFormData((current) => ({ ...current, service: toggleService(current.service, service) }))
+    setStatus(null)
   }
 
   function handleSubmit(event) {
     event.preventDefault()
-    const missing = requiredFields.filter((field) => !formData[field]?.trim())
+    const missing = requiredFields.filter((field) => !fieldHasValue(formData[field]))
 
     if (missing.length) {
       setStatus({
@@ -249,7 +270,7 @@ function App() {
     localStorage.setItem('elevatedAutoRepairLastRequest', JSON.stringify(nextRequest))
     setStatus({
       type: 'success',
-      message: `Request ${requestId} is ready. You can text it, call now, or copy the details.`,
+      message: `Request ${requestId} is ready. You can email it, text it, or copy the details.`,
     })
   }
 
@@ -350,17 +371,19 @@ function App() {
           <div className="quick-quote-panel">
             <div className="section-intro dark">
               <h2 id="quick-quote-title">Get a quick service start</h2>
-              <p>Choose the issue and vehicle basics, then continue into the full request form.</p>
+              <p>Choose one or more concerns and vehicle basics, then continue into the full request form.</p>
             </div>
 
-            <div className="service-chip-row" role="list" aria-label="Common service choices">
+            <div className="service-chip-row" role="group" aria-label="Common service choices">
               {services.map((service) => {
                 const Icon = service.icon
+                const selected = quickQuote.service.includes(service.id)
                 return (
                   <button
-                    className={quickQuote.service === service.id ? 'service-chip is-selected' : 'service-chip'}
+                    className={selected ? 'service-chip is-selected' : 'service-chip'}
                     key={service.id}
                     type="button"
+                    aria-pressed={selected}
                     onClick={() => selectQuickService(service.id)}
                   >
                     <Icon size={22} aria-hidden="true" />
@@ -418,6 +441,7 @@ function App() {
           <div className="service-grid">
             {services.map((service) => {
               const Icon = service.icon
+              const selected = formData.service.includes(service.id)
               return (
                 <article className="service-card" key={service.id}>
                   <div className="service-icon">
@@ -425,8 +449,13 @@ function App() {
                   </div>
                   <h3>{service.title}</h3>
                   <p>{service.text}</p>
-                  <button type="button" onClick={() => selectService(service.id)}>
-                    Select service
+                  <button
+                    className={selected ? 'is-selected' : undefined}
+                    type="button"
+                    aria-pressed={selected}
+                    onClick={() => selectService(service.id)}
+                  >
+                    {selected ? 'Selected' : 'Select service'}
                     <ArrowRight size={16} aria-hidden="true" />
                   </button>
                 </article>
@@ -578,17 +607,36 @@ function App() {
                 <span>Mileage</span>
                 <input name="mileage" value={formData.mileage} onChange={handleFormChange} inputMode="numeric" />
               </label>
-              <label>
-                <span>Service needed *</span>
-                <select name="service" value={formData.service} onChange={handleFormChange}>
-                  {services.map((service) => (
-                    <option key={service.id} value={service.id}>
-                      {service.title}
-                    </option>
-                  ))}
-                  <option value="Other">Other / not sure</option>
-                </select>
-              </label>
+              <fieldset className="service-selector">
+                <legend>Services needed *</legend>
+                <div className="form-service-grid" role="group" aria-label="Services needed">
+                  {services.map((service) => {
+                    const Icon = service.icon
+                    const selected = formData.service.includes(service.id)
+                    return (
+                      <button
+                        className={selected ? 'form-service-button is-selected' : 'form-service-button'}
+                        key={service.id}
+                        type="button"
+                        aria-pressed={selected}
+                        onClick={() => selectFormService(service.id)}
+                      >
+                        <Icon size={20} aria-hidden="true" />
+                        <span>{service.title}</span>
+                      </button>
+                    )
+                  })}
+                  <button
+                    className={formData.service.includes('Other') ? 'form-service-button is-selected' : 'form-service-button'}
+                    type="button"
+                    aria-pressed={formData.service.includes('Other')}
+                    onClick={() => selectFormService('Other')}
+                  >
+                    <Wrench size={20} aria-hidden="true" />
+                    <span>Other / not sure</span>
+                  </button>
+                </div>
+              </fieldset>
               <label>
                 <span>Preferred date *</span>
                 <input
